@@ -24,7 +24,7 @@ class FileRecord implements RecordInterface
         // 日志文件大小
         'maxSize'   => 20480000,
         // 日志目录
-        'logPath'   => __DIR__,
+        'logPath'   => '.',
         // 日志滚动卷数   
         'rollNum'   => 3,
         // 日志名称，空则使用当前日期作为名称       

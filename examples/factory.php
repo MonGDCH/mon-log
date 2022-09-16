@@ -52,14 +52,17 @@ $config = [
                 'logPath'   => __DIR__ . '/log/json',
             ]
         ]
-    ]
+    ],
 ];
 
 // 注册日志工厂
 $factory = LoggerFactory::instance()->registerChannel($config);
 
+// 独立创建日志通道
+$factory->createChannel('test');
 
 // 记录日志
+$factory->channel('test')->info('test channel log!');
 $factory->channel('default')->info('test log');
 $factory->channel('json')->info('test json log');
 $factory->channel()->debug('test trace log', ['trace' => true]);

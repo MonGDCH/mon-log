@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace mon\log;
 
 use ErrorException;
+use mon\log\format\LineFormat;
+use mon\log\record\FileRecord;
 use Psr\Log\InvalidArgumentException;
 use mon\log\interfaces\FormatInterface;
 use mon\log\interfaces\RecordInterface;
@@ -79,6 +81,9 @@ class LoggerFactory
      */
     public function createChannel(string $name, array $config = []): LoggerFactory
     {
+        // 格式化配置
+        $config = $this->formatConfig($config);
+
         // 创建解析器
         $format_handler = $config['format']['handler'];
         if (!is_subclass_of($format_handler, FormatInterface::class)) {
@@ -151,5 +156,38 @@ class LoggerFactory
         }
 
         return $this->channels[$name];
+    }
+
+    /**
+     * 格式化配置信息
+     *
+     * @param array $config 配置信息
+     * @return array
+     */
+    protected function formatConfig(array $config): array
+    {
+        // 默认配置
+        $default = [
+            // 解析器
+            'format' => ['handler' => LineFormat::class, 'config' => []],
+            // 记录器
+            'record' => ['handler' => FileRecord::class, 'config' => []]
+        ];
+
+        // 覆盖配置
+        if (isset($config['format']) && isset($config['format']['handler']) && !empty($config['format']['handler'])) {
+            $default['format']['handler'] = $config['format']['handler'];
+        }
+        if (isset($config['format']) && isset($config['format']['config']) && !empty($config['format']['config'])) {
+            $default['format']['config'] = $config['format']['config'];
+        }
+        if (isset($config['record']) && isset($config['record']['handler']) && !empty($config['record']['handler'])) {
+            $default['record']['handler'] = $config['record']['handler'];
+        }
+        if (isset($config['record']) && isset($config['record']['config']) && !empty($config['record']['config'])) {
+            $default['record']['config'] = $config['record']['config'];
+        }
+
+        return $default;
     }
 }
