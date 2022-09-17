@@ -19,7 +19,7 @@ interface RecordInterface
      * @param string $message   日志信息
      * @return void
      */
-    public function record($level, string $messgae): void;
+    public function record($level, string $messgae);
 
     /**
      * 设置配置信息

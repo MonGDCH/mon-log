@@ -127,7 +127,7 @@ class LoggerFactory
      * @param string $name  通道名称
      * @return void
      */
-    public function removeChannel(string $name): void
+    public function removeChannel(string $name)
     {
         unset($this->channels[$name]);
     }

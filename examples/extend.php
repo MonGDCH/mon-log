@@ -64,7 +64,7 @@ class MyRecord implements RecordInterface
      * @param string $message   日志信息
      * @return void
      */
-    public function record($level, string $messgae): void
+    public function record($level, string $messgae)
     {
         $path = $this->config['path'] . DIRECTORY_SEPARATOR . 'my.log';
         file_put_contents($path, $messgae, FILE_APPEND);

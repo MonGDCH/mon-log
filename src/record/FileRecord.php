@@ -48,7 +48,7 @@ class FileRecord implements RecordInterface
      * @param string $message   日志信息
      * @return void
      */
-    public function record($level, string $messgae): void
+    public function record($level, string $messgae)
     {
         // 日志名
         $log_name = $this->config['logName'] ?: date('Ymd', time());
@@ -137,7 +137,7 @@ class FileRecord implements RecordInterface
      * @throws RuntimeException
      * @return void
      */
-    protected function shiftFile(string $path, int $rollNum, string $postfix = '.log'): void
+    protected function shiftFile(string $path, int $rollNum, string $postfix = '.log')
     {
         // 判断是否存在最老的一份文件，存在则删除
         $oldest = $this->buildShiftName($path, ($rollNum - 1));
