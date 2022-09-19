@@ -17,7 +17,7 @@ interface RecordInterface
      *
      * @param mixed $level      日志级别
      * @param string $message   日志信息
-     * @return void
+     * @return mixed
      */
     public function record($level, string $messgae);
 

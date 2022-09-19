@@ -1,7 +1,7 @@
 <?php
 
+use mon\log\Log;
 use mon\log\format\LineFormat;
-use mon\log\Logger;
 use mon\log\record\FileRecord;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -20,8 +20,11 @@ $record = new FileRecord([
     'logName'   => '',
 ]);
 
-$logger = new Logger($format, $record);
+$logger = new Log($format, $record);
 
 // 记录日志
 $logger->notice('Test notice log');
 $logger->info('Test info log', ['trace' => true]);
+
+$logger2 = new Log();
+$logger2->warning('test warning');

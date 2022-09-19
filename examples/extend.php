@@ -1,8 +1,8 @@
 <?php
 
+use mon\log\Log;
 use mon\log\interfaces\FormatInterface;
 use mon\log\interfaces\RecordInterface;
-use mon\log\Logger;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -91,5 +91,5 @@ $record = new MyRecord;
 $record->setConfig(['path' => __DIR__]);
 
 // 记录日志
-$logger = new Logger($format, $record);
+$logger = new Log($format, $record);
 $logger->info('Test extend logger');

@@ -46,7 +46,7 @@ class FileRecord implements RecordInterface
      *
      * @param mixed $level      日志级别
      * @param string $message   日志信息
-     * @return void
+     * @return bool
      */
     public function record($level, string $messgae)
     {
@@ -55,7 +55,7 @@ class FileRecord implements RecordInterface
         // 日志路径
         $log_path = $this->config['logPath'] . DIRECTORY_SEPARATOR . $log_name;
         // 分卷记录日志
-        $this->subsectionFile($messgae . PHP_EOL, $log_path, $this->config['maxSize'], $this->config['rollNum']);
+        return $this->subsectionFile($messgae . PHP_EOL, $log_path, $this->config['maxSize'], $this->config['rollNum']);
     }
 
     /**

@@ -1,12 +1,12 @@
 {
     "name": "mongdch/mon-log",
-    "description": "The utils for log.",
+    "description": "The Logger Utils for PSR-3.",
     "license": "MIT",
     "homepage": "http://gdmon.com/",
     "keywords": [
         "log",
         "logger",
-        "psr-3"
+        "PSR-3"
     ],
     "authors": [
         {

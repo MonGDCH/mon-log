@@ -1,6 +1,6 @@
 <?php
 
-use mon\log\LoggerFactory;
+use mon\log\Logger;
 use mon\log\format\JsonFormat;
 use mon\log\format\LineFormat;
 use mon\log\record\FileRecord;
@@ -56,7 +56,7 @@ $config = [
 ];
 
 // 注册日志工厂
-$factory = LoggerFactory::instance()->registerChannel($config);
+$factory = Logger::instance()->registerChannel($config);
 
 // 独立创建日志通道
 $factory->createChannel('test');
