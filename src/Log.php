@@ -56,7 +56,7 @@ class Log extends AbstractLogger implements LoggerInterface
     }
 
     /**
-     * 获取保存驱动
+     * 获取日志保存驱动
      *
      * @return RecordInterface
      */
@@ -68,9 +68,9 @@ class Log extends AbstractLogger implements LoggerInterface
     /**
      * 记录日志
      *
-     * @param string $level
-     * @param string $message
-     * @param array $context
+     * @param string $level     日志级别
+     * @param string $message   日志内容
+     * @param array $context    额外信息
      * @return void
      */
     public function log($level, $message, array $context = [])
@@ -78,6 +78,6 @@ class Log extends AbstractLogger implements LoggerInterface
         // 解析获取日志内容
         $content = $this->getFormat()->format($level, $message, $context);
         // 保存
-        $this->getRecord()->record($level, $content);
+        $this->getRecord()->record($level, $content, $context);
     }
 }

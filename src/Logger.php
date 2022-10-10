@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace mon\log;
 
 use ErrorException;
-use Psr\Log\LoggerInterface;
 use mon\log\format\LineFormat;
 use mon\log\record\FileRecord;
 use Psr\Log\InvalidArgumentException;
@@ -30,7 +29,7 @@ class Logger
     /**
      * 日志记录通道
      *
-     * @var LoggerInterface[]
+     * @var Log[]
      */
     protected $channels = [];
 
@@ -148,9 +147,9 @@ class Logger
      *
      * @param string $name  通道名称
      * @throws ErrorException
-     * @return LoggerInterface
+     * @return Log
      */
-    public function channel(string $name = 'default'): LoggerInterface
+    public function channel(string $name = 'default'): Log
     {
         if (!$this->hasChannel($name)) {
             throw new ErrorException('Logger channel [' . $name . '] not found!');

@@ -17,9 +17,10 @@ interface RecordInterface
      *
      * @param mixed $level      日志级别
      * @param string $message   日志信息
+     * @param array $context    信息参数
      * @return mixed
      */
-    public function record($level, string $messgae);
+    public function record($level, string $messgae, array $context = []);
 
     /**
      * 设置配置信息
