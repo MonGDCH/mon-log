@@ -11,7 +11,7 @@ $format = new LineFormat();
 // 记录器
 $record = new FileRecord([
     // 日志文件大小
-    'maxSize'   => 20480000,
+    'maxSize'   => 10240,
     // 日志目录
     'logPath'   => __DIR__ . '/log',
     // 日志滚动卷数   
@@ -24,7 +24,8 @@ $logger = new Log($format, $record);
 
 // 记录日志
 $logger->notice('Test notice log');
-$logger->info('Test info log', ['trace' => true]);
+$log = file_get_contents(__DIR__ . '/../README.md');
+$logger->info($log, ['trace' => true]);
 
 $logger2 = new Log();
 $logger2->warning('test warning');

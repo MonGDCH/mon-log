@@ -32,7 +32,7 @@ $config = [
                 // 日志滚动卷数   
                 'rollNum'   => 3,
                 // 日志名称，空则使用当前日期作为名称       
-                'logName'   => '',
+                'logName'   => 'default',
             ]
         ]
     ],
@@ -86,6 +86,9 @@ $factory = Logger::instance()->registerChannel($config);
 
 // 独立创建日志通道
 $factory->createChannel('test');
+
+// 设置默认通道名称
+$factory->setDefaultChanneel('default');
 
 // 记录日志
 $factory->channel('test')->info('test channel log!');

@@ -34,6 +34,13 @@ class Logger
     protected $channels = [];
 
     /**
+     * 默认通道名
+     *
+     * @var string
+     */
+    protected $defaultChanneel = 'default';
+
+    /**
      * 私有化构造方法
      */
     protected function __construct()
@@ -149,13 +156,26 @@ class Logger
      * @throws ErrorException
      * @return Log
      */
-    public function channel(string $name = 'default'): Log
+    public function channel(string $name = ''): Log
     {
+        $name = $name ?: $this->defaultChanneel;
         if (!$this->hasChannel($name)) {
             throw new ErrorException('Logger channel [' . $name . '] not found!');
         }
 
         return $this->channels[$name];
+    }
+
+    /**
+     * 设置默认通道名称
+     *
+     * @param string $name  通道名称
+     * @return Logger
+     */
+    public function setDefaultChanneel(string $name): Logger
+    {
+        $this->defaultChanneel = $name;
+        return $this;
     }
 
     /**

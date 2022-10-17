@@ -124,7 +124,7 @@ class Util
             if (file_exists($oldFileName)) {
                 $newFileNmae = $this->buildShiftName($path, ($i + 1)) . $postfix;
                 // 重命名
-                if (($oldFile != $newFileNmae) && is_writable($oldFileName) && !rename($oldFile, $newFileNmae)) {
+                if (($oldFileName != $newFileNmae) && is_writable($oldFileName) && !rename($oldFileName, $newFileNmae)) {
                     throw new RuntimeException("Failed to rename volume file name, oldFileName: {$oldFileName}, newFileNmae: {$newFileNmae}");
                 }
             }
