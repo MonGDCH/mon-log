@@ -24,13 +24,12 @@ class Util
     /**
      * 获取单例
      *
-     * @param array $options 初始化参数
      * @return Util
      */
-    public static function instance($options = []): Util
+    public static function instance(): Util
     {
         if (is_null(static::$instance)) {
-            static::$instance = new static($options);
+            static::$instance = new static();
         }
 
         return static::$instance;
@@ -65,7 +64,7 @@ class Util
      * @param  string  $content 记录的内容
      * @param  string  $path    保存的路径, 不含后缀
      * @param  integer $maxSize 文件最大尺寸
-     * @param  string  $rollNum 分卷数
+     * @param  integer $rollNum 分卷数
      * @param  string  $postfix 文件后缀
      * @throws RuntimeException
      * @return boolean

@@ -22,13 +22,13 @@ class FileBatchRecord implements RecordInterface
      */
     protected $config = [
         // 日志文件大小
-        'maxSize'   => 20480000,
+        'maxSize' => 20480000,
         // 日志目录
-        'logPath'   => '.',
+        'logPath' => '.',
         // 日志滚动卷数   
-        'rollNum'   => 3,
+        'rollNum' => 3,
         // 日志名称，空则使用当前日期作为名称       
-        'logName'   => '',
+        'logName' => '',
     ];
 
     /**
@@ -54,9 +54,9 @@ class FileBatchRecord implements RecordInterface
      * @param mixed $level      日志级别
      * @param string $message   日志信息
      * @param array $context    信息参数
-     * @return bool
+     * @return boolean
      */
-    public function record($level, string $message, array $context = [])
+    public function record($level, string $message, array $context = []): bool
     {
         $this->logs[] = $message;
 
@@ -110,9 +110,9 @@ class FileBatchRecord implements RecordInterface
      * 设置配置信息
      *
      * @param array $config 配置信息
-     * @return FileRecord
+     * @return FileBatchRecord
      */
-    public function setConfig(array $config)
+    public function setConfig(array $config): FileBatchRecord
     {
         $this->config = array_merge($this->config, $config);
         return $this;
