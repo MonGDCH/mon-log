@@ -8,7 +8,7 @@ namespace mon\log\interfaces;
  * 解析日志内容接口
  * 
  * @author Mon <985558837@qq.com>
- * @version 1.0.0
+ * @version 1.0.1   2023-05-23 增加getConfig接口，优化返回结果
  */
 interface FormatInterface
 {
@@ -26,7 +26,14 @@ interface FormatInterface
      * 设置配置信息
      *
      * @param array $config 配置信息
-     * @return mixed
+     * @return FormatInterface
      */
-    public function setConfig(array $config);
+    public function setConfig(array $config): FormatInterface;
+
+    /**
+     * 获取配置信息
+     *
+     * @return array
+     */
+    public function getConfig(): array;
 }

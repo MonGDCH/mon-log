@@ -3,8 +3,8 @@
 use mon\log\Logger;
 use mon\log\format\JsonFormat;
 use mon\log\format\LineFormat;
+use mon\log\record\DbRecord;
 use mon\log\record\FileRecord;
-use mon\log\record\FileBatchRecord;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -17,7 +17,18 @@ $config = [
             // 类名
             'handler'   => LineFormat::class,
             // 配置信息
-            'config'    => []
+            'config'    => [
+                // 日志是否包含级别
+                'level'         => true,
+                // 日志是否包含时间
+                'date'          => true,
+                // 时间格式，启用日志时间时有效
+                'date_format'   => 'Y-m-d H:i:s',
+                // 是否启用日志追踪
+                'trace'         => false,
+                // 追踪层级，启用日志追踪时有效
+                'layer'         => 3
+            ]
         ],
         // 记录器
         'record'    => [
@@ -25,14 +36,18 @@ $config = [
             'handler'   => FileRecord::class,
             // 配置信息
             'config'    => [
+                // 是否自动写入文件
+                'save'      => false,
+                // 写入文件后，清除缓存日志
+                'clear'     => true,
+                // 日志名称，空则使用当前日期作为名称       
+                'logName'   => '',
                 // 日志文件大小
                 'maxSize'   => 20480000,
                 // 日志目录
                 'logPath'   => __DIR__ . '/log',
                 // 日志滚动卷数   
-                'rollNum'   => 3,
-                // 日志名称，空则使用当前日期作为名称       
-                'logName'   => 'default',
+                'rollNum'   => 3
             ]
         ]
     ],
@@ -42,7 +57,18 @@ $config = [
             // 类名
             'handler'   => JsonFormat::class,
             // 配置信息
-            'config'    => []
+            'config'    => [
+                // 日志是否包含级别
+                'level'         => true,
+                // 日志是否包含时间
+                'date'          => true,
+                // 时间格式，启用日志时间时有效
+                'date_format'   => 'Y-m-d H:i:s',
+                // 是否启用日志追踪
+                'trace'         => false,
+                // 追踪层级，启用日志追踪时有效
+                'layer'         => 3
+            ]
         ],
         // 记录器
         'record'    => [
@@ -54,51 +80,55 @@ $config = [
             ]
         ]
     ],
-    'batch' => [
-        // 解析器
-        'format'    => [
-            // 类名
-            'handler'   => LineFormat::class,
-            // 配置信息
-            'config'    => []
-        ],
-        // 记录器
-        'record'    => [
-            // 类名
-            'handler'   => FileBatchRecord::class,
-            // 配置信息
-            'config'    => [
-                // 日志文件大小
-                'maxSize'   => 20480000,
-                // 日志目录
-                'logPath'   => __DIR__ . '/log/batch',
-                // 日志滚动卷数   
-                'rollNum'   => 3,
-                // 日志名称，空则使用当前日期作为名称       
-                'logName'   => '',
-            ]
-        ]
-    ],
 ];
 
 // 注册日志工厂
 $factory = Logger::instance()->registerChannel($config);
 
 // 独立创建日志通道
-$factory->createChannel('test');
+$factory->createChannel('db', [
+    // 解析器
+    'format'    => [
+        // 类名
+        'handler'   => LineFormat::class,
+        // 配置信息
+        'config'    => [
+            // 是否启用日志追踪
+            'trace'         => true,
+        ]
+    ],
+    // 记录器
+    'record'    => [
+        // 类名
+        'handler'   => DbRecord::class,
+        // 配置信息
+        'config'    => [
+            // 数据库名
+            'database'      => 'test',
+            // 表名
+            'table'         => 'log',
+            // 用户名
+            'username'      => 'root',
+            // 密码
+            'password'      => '123456',
+        ]
+    ]
+]);
 
 // 设置默认通道名称
-$factory->setDefaultChanneel('default');
+$factory->setDefaultChannel('default');
 
 // 记录日志
-$factory->channel('test')->info('test channel log!');
-$factory->channel('default')->info('test log');
+$factory->channel()->info('record log');
+$factory->channel()->info('record log123');
+$factory->channel()->info('record log465', ['save' => true]);
+
 $factory->channel('json')->info('test json log');
-$factory->channel()->debug('test trace log', ['trace' => true]);
+$factory->channel('json')->debug('test trace log', ['trace' => false]);
 
 
-$factory->channel('batch')->info('test batch record...1');
-$factory->channel('batch')->info('test batch record save1', ['save' => true]);
-$factory->channel('batch')->info('test batch record...2');
-$factory->channel('batch')->info('test batch record...3');
-$factory->channel('batch')->info('test batch record save2', ['save' => true]);
+// $factory->channel('db')->info('test db record...1');
+// $factory->channel('db')->debug('test db record ');
+// $factory->channel('db')->error('test db record', ['uid' => 2, 'ext' => '123456', 'ip' => '127.0.0.1']);
+// $factory->channel('db')->info('test db record...2');
+// $factory->channel('db')->info('test db record...3', ['save' => true]);

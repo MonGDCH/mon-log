@@ -39,9 +39,20 @@ class MyFormat implements FormatInterface
      * @param array $config 配置信息
      * @return mixed
      */
-    public function setConfig(array $config)
+    public function setConfig(array $config): MyFormat
     {
         $this->config = $config;
+        return $this;
+    }
+
+    /**
+     * 获取配置信息
+     *
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return $this->config;
     }
 }
 
@@ -74,11 +85,22 @@ class MyRecord implements RecordInterface
      * 设置配置信息
      *
      * @param array $config 配置信息
-     * @return mixed
+     * @return MyRecord
      */
-    public function setConfig(array $config)
+    public function setConfig(array $config): MyRecord
     {
         $this->config = $config;
+        return $this;
+    }
+
+    /**
+     * 获取配置信息
+     *
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return $this->config;
     }
 }
 

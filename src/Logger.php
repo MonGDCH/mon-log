@@ -132,11 +132,12 @@ class Logger
      * 删除指定通道
      *
      * @param string $name  通道名称
-     * @return void
+     * @return Logger
      */
-    public function removeChannel(string $name)
+    public function removeChannel(string $name): Logger
     {
         unset($this->channels[$name]);
+        return $this;
     }
 
     /**
@@ -172,7 +173,7 @@ class Logger
      * @param string $name  通道名称
      * @return Logger
      */
-    public function setDefaultChanneel(string $name): Logger
+    public function setDefaultChannel(string $name): Logger
     {
         $this->defaultChanneel = $name;
         return $this;

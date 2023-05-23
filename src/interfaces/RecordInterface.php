@@ -8,7 +8,7 @@ namespace mon\log\interfaces;
  * 日志保存接口
  * 
  * @author Mon <985558837@qq.com>
- * @version 1.0.0
+ * @version 1.0.1   2023-05-23 增加getConfig接口，优化返回结果
  */
 interface RecordInterface
 {
@@ -26,7 +26,14 @@ interface RecordInterface
      * 设置配置信息
      *
      * @param array $config 配置信息
-     * @return mixed
+     * @return RecordInterface
      */
-    public function setConfig(array $config);
+    public function setConfig(array $config): RecordInterface;
+
+    /**
+     * 获取配置信息
+     *
+     * @return array
+     */
+    public function getConfig(): array;
 }

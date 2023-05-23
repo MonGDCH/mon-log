@@ -11,10 +11,28 @@ use mon\log\interfaces\FormatInterface;
  * 按JSON格式解析日志内容
  * 
  * @author Mon <985558837@qq.com>
- * @version 1.0.0
+ * @version 1.0.1 2023-05-23 优化逻辑，支持配置化
  */
 class JsonFormat implements FormatInterface
 {
+    /**
+     * 配置信息
+     *
+     * @var array
+     */
+    protected $config = [
+        // 日志是否包含级别
+        'level'         => true,
+        // 日志是否包含时间
+        'date'          => true,
+        // 时间格式，启用日志时间时有效
+        'date_format'   => 'Y-m-d H:i:s',
+        // 是否启用日志追踪
+        'trace'         => false,
+        // 追踪层级，启用日志追踪时有效
+        'layer'         => 3
+    ];
+
     /**
      * 解析日志内容
      *
@@ -30,19 +48,26 @@ class JsonFormat implements FormatInterface
             throw new InvalidArgumentException('Log message type must be String');
         }
 
-        // 时间格式
-        $dateformat = $context['date_format'] ?? 'Y-m-d H:i:s';
         // 日志内容
-        $date = date($dateformat, time());
-        $logs = [
-            'level' => $level,
-            'date'  => $date
-        ];
-
-        // 开启日志追踪
-        if (isset($context['trace']) && $context['trace']) {
+        $log = [];
+        // 时间
+        $showDate = $context['date'] ?? $this->config['date'];
+        if ($showDate) {
+            // 时间格式
+            $dateformat = $context['date_format'] ?? $this->config['date_format'];
+            $date = date($dateformat, time());
+            $log['date'] = $date;
+        }
+        // 日志级别
+        $showLevel = $context['level'] ?? $this->config['level'];
+        if ($showLevel) {
+            $log['level'] = $level;
+        }
+        // 日志追踪
+        $showTrace = $context['trace'] ?? $this->config['trace'];
+        if ($showTrace) {
             // 获取追踪层级
-            $layer = isset($context['layer']) ? intval($context['layer']) : 3;
+            $layer = $context['layer'] ?? $this->config['layer'];
             // 获取堆栈调用记录
             $traceInfo = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, $layer);
             // 获取调用层
@@ -52,8 +77,8 @@ class JsonFormat implements FormatInterface
             // 获取调用行号
             $call_line = $traceInfo[$call_layer]['line'];
             // 记录日志
-            $logs['file'] = $call_file;
-            $logs['line'] = $call_line;
+            $log['file'] = $call_file;
+            $log['line'] = $call_line;
         }
 
         // 日志内容替换
@@ -66,8 +91,8 @@ class JsonFormat implements FormatInterface
             $message = strtr($message, $replace);
         }
 
-        $logs['messgae'] = $message;
-        return json_encode($logs, JSON_UNESCAPED_UNICODE);
+        $log['messgae'] = $message;
+        return json_encode($log, JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -76,8 +101,19 @@ class JsonFormat implements FormatInterface
      * @param array $config 配置信息
      * @return JsonFormat
      */
-    public function setConfig(array $config)
+    public function setConfig(array $config): JsonFormat
     {
+        $this->config = array_merge($this->config, $config);
         return $this;
+    }
+
+    /**
+     * 获取配置信息
+     *
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return $this->config;
     }
 }
