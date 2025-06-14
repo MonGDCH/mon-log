@@ -99,24 +99,24 @@ class DbRecord implements RecordInterface
      */
     public function save(array $context = []): bool
     {
-        $values = [];
-        foreach ($this->logs as $level => $logs) {
-            $lv = $this->getDB()->quote((string) $level);
-            foreach ($logs as $log) {
-                $item = array_map(function ($v) {
-                    return $this->getDB()->quote((string) $v);
-                }, $log);
-                $item['level'] = $lv;
-                $values[] = "({$item['level']}, {$item['content']}, {$item['uid']}, {$item['ip']}, {$item['ext']}, {$item['create_time']})";
+        if (!empty($this->logs)) {
+            $values = [];
+            foreach ($this->logs as $level => $logs) {
+                $lv = $this->getDB()->quote((string) $level);
+                foreach ($logs as $log) {
+                    $item = array_map(function ($v) {
+                        return $this->getDB()->quote((string) $v);
+                    }, $log);
+                    $item['level'] = $lv;
+                    $values[] = "({$item['level']}, {$item['content']}, {$item['uid']}, {$item['ip']}, {$item['ext']}, {$item['create_time']})";
+                }
             }
-        }
-        // 默认保存后，清除日志记录
-        $clear = $context['clear'] ?? $this->config['clear'];
-        if ($clear !== false) {
-            $this->clearLog();
-        }
+            // 默认保存后，清除日志记录
+            $clear = $context['clear'] ?? $this->config['clear'];
+            if ($clear !== false) {
+                $this->clearLog();
+            }
 
-        if (!empty($values)) {
             $sql = "INSERT INTO {$this->config['table']} (level, content, uid, ip, ext, create_time) VALUES " . implode(', ', $values);
             $save = $this->execute($sql);
             return $save > 0;
