@@ -70,10 +70,10 @@ class DbRecord implements RecordInterface
      *
      * @param mixed $level      日志级别
      * @param string $message   日志信息
-     * @param array $context    信息参数
-     * @return bool
+     * @param array $context    额外信息参数
+     * @return boolean
      */
-    public function record($level, string $message, array $context = [])
+    public function record($level, string $message, array $context = []): bool
     {
         $this->logs[$level][] = [
             'content'       => $message,
@@ -86,28 +86,40 @@ class DbRecord implements RecordInterface
         // 是否保存
         $save = $context['save'] ?? $this->config['save'];
         if ($save === true) {
-            $values = [];
-            foreach ($this->logs as $level => $logs) {
-                $lv = $this->getDB()->quote((string) $level);
-                foreach ($logs as $log) {
-                    $item = array_map(function ($v) {
-                        return $this->getDB()->quote((string) $v);
-                    }, $log);
-                    $item['level'] = $lv;
-                    $values[] = "({$item['level']}, {$item['content']}, {$item['uid']}, {$item['ip']}, {$item['ext']}, {$item['create_time']})";
-                }
-            }
+        }
 
-            if (!empty($values)) {
-                $sql = "INSERT INTO {$this->config['table']} (level, content, uid, ip, ext, create_time) VALUES " . implode(', ', $values);
-                return $this->execute($sql);
-            }
+        return true;
+    }
 
-            // 默认保存后，清除日志记录
-            $clear = $context['clear'] ?? $this->config['clear'];
-            if ($clear !== false) {
-                $this->clearLog();
+    /**
+     * 保存日志
+     *
+     * @param array $context    配置参数
+     * @return boolean
+     */
+    public function save(array $context = []): bool
+    {
+        $values = [];
+        foreach ($this->logs as $level => $logs) {
+            $lv = $this->getDB()->quote((string) $level);
+            foreach ($logs as $log) {
+                $item = array_map(function ($v) {
+                    return $this->getDB()->quote((string) $v);
+                }, $log);
+                $item['level'] = $lv;
+                $values[] = "({$item['level']}, {$item['content']}, {$item['uid']}, {$item['ip']}, {$item['ext']}, {$item['create_time']})";
             }
+        }
+        // 默认保存后，清除日志记录
+        $clear = $context['clear'] ?? $this->config['clear'];
+        if ($clear !== false) {
+            $this->clearLog();
+        }
+
+        if (!empty($values)) {
+            $sql = "INSERT INTO {$this->config['table']} (level, content, uid, ip, ext, create_time) VALUES " . implode(', ', $values);
+            $save = $this->execute($sql);
+            return $save > 0;
         }
 
         return true;

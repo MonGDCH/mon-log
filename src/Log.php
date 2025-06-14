@@ -73,11 +73,32 @@ class Log extends AbstractLogger implements LoggerInterface
      * @param array $context    额外信息
      * @return void
      */
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         // 解析获取日志内容
         $content = $this->getFormat()->format($level, $message, $context);
         // 保存
         $this->getRecord()->record($level, $content, $context);
+    }
+
+    /**
+     * 获取缓存中的日志记录
+     *
+     * @return array
+     */
+    public function getLog(): array
+    {
+        return $this->getRecord()->getLog();
+    }
+
+    /**
+     * 保存日志
+     *
+     * @param array $context    配置信息
+     * @return boolean
+     */
+    public function saveLog(array $context = []): bool
+    {
+        return $this->getRecord()->save($context);
     }
 }

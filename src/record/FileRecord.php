@@ -47,7 +47,7 @@ class FileRecord implements RecordInterface
      *
      * @param mixed $level      日志级别
      * @param string $message   日志信息
-     * @param array $context    信息参数
+     * @param array $context    额外信息参数
      * @return boolean
      */
     public function record($level, string $message, array $context = []): bool
@@ -57,25 +57,36 @@ class FileRecord implements RecordInterface
         // 是否写入日志
         $save = $context['save'] ?? $this->config['save'];
         if ($save === true) {
-            // 日志名
-            $name = $context['logName'] ?? $this->config['logName'];
-            $log_name = $name ?: date('Ymd', time());
-            // 日志路径
-            $path = $context['logPath'] ?? $this->config['logPath'];
-            $log_path = $path . DIRECTORY_SEPARATOR . $log_name;
-            // 日志信息
-            $log = implode(PHP_EOL, $this->logs) . PHP_EOL;
-            // 保存后，清除日志记录
-            $clear = $context['clear'] ?? $this->config['clear'];
-            if ($clear !== false) {
-                $this->clearLog();
-            }
-
-            // 分卷记录日志
-            return Util::instance()->subsectionFile($log, $log_path, $this->config['maxSize'], $this->config['rollNum']);
+            return $this->save($context);
         }
 
         return true;
+    }
+
+    /**
+     * 保存日志
+     *
+     * @param array $context    配置参数
+     * @return boolean
+     */
+    public function save(array $context = []): bool
+    {
+        // 日志名
+        $name = $context['logName'] ?? $this->config['logName'];
+        $log_name = $name ?: date('Ymd', time());
+        // 日志路径
+        $path = $context['logPath'] ?? $this->config['logPath'];
+        $log_path = $path . DIRECTORY_SEPARATOR . $log_name;
+        // 日志信息
+        $log = implode(PHP_EOL, $this->logs) . PHP_EOL;
+        // 保存后，清除日志记录
+        $clear = $context['clear'] ?? $this->config['clear'];
+        if ($clear !== false) {
+            $this->clearLog();
+        }
+
+        // 分卷记录日志
+        return Util::subsectionFile($log, $log_path, $this->config['maxSize'], $this->config['rollNum']);
     }
 
     /**

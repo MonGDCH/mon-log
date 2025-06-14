@@ -43,9 +43,7 @@ class Logger
     /**
      * 私有化构造方法
      */
-    protected function __construct()
-    {
-    }
+    protected function __construct() {}
 
     /**
      * 获取实例
@@ -86,7 +84,7 @@ class Logger
      * @throws InvalidArgumentException
      * @return Logger
      */
-    public function createChannel(string $name, array $config = []): Logger
+    public function createChannel(string $name = 'default', array $config = []): Logger
     {
         // 格式化配置
         $config = $this->formatConfig($config);
@@ -132,12 +130,11 @@ class Logger
      * 删除指定通道
      *
      * @param string $name  通道名称
-     * @return Logger
+     * @return void
      */
-    public function removeChannel(string $name): Logger
+    public function removeChannel(string $name)
     {
         unset($this->channels[$name]);
-        return $this;
     }
 
     /**
@@ -210,5 +207,17 @@ class Logger
         }
 
         return $default;
+    }
+
+    /**
+     * 静态调用支持
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
+    public static function __callStatic($name, $arguments)
+    {
+        return static::instance()->channel()->$name(...$arguments);
     }
 }

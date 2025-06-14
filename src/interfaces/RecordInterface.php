@@ -18,9 +18,17 @@ interface RecordInterface
      * @param mixed $level      日志级别
      * @param string $message   日志信息
      * @param array $context    信息参数
-     * @return mixed
+     * @return boolean
      */
-    public function record($level, string $messgae, array $context = []);
+    public function record($level, string $messgae, array $context = []): bool;
+
+    /**
+     * 保存日志
+     *
+     * @param array $context
+     * @return boolean
+     */
+    public function save(array $context = []): bool;
 
     /**
      * 设置配置信息
@@ -36,4 +44,11 @@ interface RecordInterface
      * @return array
      */
     public function getConfig(): array;
+
+    /**
+     * 获取日志缓存记录
+     *
+     * @return array
+     */
+    public function getLog(): array;
 }
