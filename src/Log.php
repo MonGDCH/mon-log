@@ -39,7 +39,7 @@ class Log extends AbstractLogger implements LoggerInterface
      * @param FormatInterface $format   日志内容解析器，默认 LineFormat
      * @param RecordInterface $record   日志内容记录器，默认 FileRecord
      */
-    public function __construct(FormatInterface $format = null, RecordInterface $record = null)
+    public function __construct(?FormatInterface $format = null, ?RecordInterface $record = null)
     {
         $this->format = $format ?? new LineFormat();
         $this->record = $record ?? new FileRecord();
