@@ -72,12 +72,11 @@ class LineFormat implements FormatInterface
             $traceInfo = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, $layer);
             // 获取调用层
             $call_layer = $layer > 0 ? ($layer - 1) : $layer;
-            // 获取调用文件
-            $call_file = $traceInfo[$call_layer]['file'];
-            // 获取调用行号
-            $call_line = $traceInfo[$call_layer]['line'];
-            // 记录日志
-            $log[] = "{$call_file}:{$call_line}";
+            // 实际调用堆栈层级可能不足配置层级，缺省时忽略追踪信息
+            if (isset($traceInfo[$call_layer]['file'], $traceInfo[$call_layer]['line'])) {
+                // 记录日志
+                $log[] = "{$traceInfo[$call_layer]['file']}:{$traceInfo[$call_layer]['line']}";
+            }
         }
 
         // 日志内容替换

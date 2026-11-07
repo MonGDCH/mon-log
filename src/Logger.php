@@ -110,7 +110,7 @@ class Logger
         $record->setConfig($record_config);
 
         // 创建保存日志驱动
-        $this->channels[$name] = new Log($format, $record);
+        $this->channels[$name] = new Log($format, $record, $config['throw'] ?? true);
 
         return $this;
     }
@@ -189,10 +189,15 @@ class Logger
             // 解析器
             'format' => ['handler' => LineFormat::class, 'config' => []],
             // 记录器
-            'record' => ['handler' => FileRecord::class, 'config' => []]
+            'record' => ['handler' => FileRecord::class, 'config' => []],
+            // 日志失败是否抛出异常
+            'throw' => true
         ];
 
         // 覆盖配置
+        if (isset($config['throw'])) {
+            $default['throw'] = (bool) $config['throw'];
+        }
         if (isset($config['format']) && isset($config['format']['handler']) && !empty($config['format']['handler'])) {
             $default['format']['handler'] = $config['format']['handler'];
         }

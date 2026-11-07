@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace mon\log\record;
 
 use PDO;
+use PDOException;
+use Psr\Log\InvalidArgumentException;
 use mon\log\interfaces\RecordInterface;
 
 /**
@@ -86,6 +88,7 @@ class DbRecord implements RecordInterface
         // 是否保存
         $save = $context['save'] ?? $this->config['save'];
         if ($save === true) {
+            return $this->save($context);
         }
 
         return true;
@@ -100,26 +103,42 @@ class DbRecord implements RecordInterface
     public function save(array $context = []): bool
     {
         if (!empty($this->logs)) {
-            $values = [];
+            // 校验表名，防止SQL注入
+            $table = $this->config['table'];
+            if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $table)) {
+                throw new InvalidArgumentException("Invalid log table name: {$table}");
+            }
+
+            // 构建参数绑定的批量插入语句
+            $placeholders = [];
+            $params = [];
+            $index = 0;
             foreach ($this->logs as $level => $logs) {
-                $lv = $this->getDB()->quote((string) $level);
                 foreach ($logs as $log) {
-                    $item = array_map(function ($v) {
-                        return $this->getDB()->quote((string) $v);
-                    }, $log);
-                    $item['level'] = $lv;
-                    $values[] = "({$item['level']}, {$item['content']}, {$item['uid']}, {$item['ip']}, {$item['ext']}, {$item['create_time']})";
+                    $placeholders[] = "(:level_{$index}, :content_{$index}, :uid_{$index}, :ip_{$index}, :ext_{$index}, :create_time_{$index})";
+                    $params[":level_{$index}"] = (string) $level;
+                    $params[":content_{$index}"] = (string) $log['content'];
+                    $params[":uid_{$index}"] = (int) $log['uid'];
+                    $params[":ip_{$index}"] = (string) $log['ip'];
+                    // ext 可能为数组等非字符串类型，序列化后存储
+                    $params[":ext_{$index}"] = is_array($log['ext']) ? json_encode($log['ext'], JSON_UNESCAPED_UNICODE) : (string) $log['ext'];
+                    $params[":create_time_{$index}"] = (int) $log['create_time'];
+                    $index++;
                 }
             }
-            // 默认保存后，清除日志记录
+
+            // 写入数据库
+            $sql = "INSERT INTO `{$table}` (level, content, uid, ip, ext, create_time) VALUES " . implode(', ', $placeholders);
+            $save = $this->execute($sql, $params);
+            $result = $save > 0;
+
+            // 写入成功后，清除日志记录，失败时保留缓存以便重试
             $clear = $context['clear'] ?? $this->config['clear'];
-            if ($clear !== false) {
+            if ($result && $clear !== false) {
                 $this->clearLog();
             }
 
-            $sql = "INSERT INTO {$this->config['table']} (level, content, uid, ip, ext, create_time) VALUES " . implode(', ', $values);
-            $save = $this->execute($sql);
-            return $save > 0;
+            return $result;
         }
 
         return true;
@@ -171,15 +190,19 @@ class DbRecord implements RecordInterface
     /**
      * 获取DB链接
      *
-     * @throws PDOException
      * @return PDO
      */
     protected function getDB(): PDO
     {
         if (!$this->db) {
             // 生成mysql连接dsn
-            $is_port = (isset($this->config['port']) && is_int($this->config['port'] * 1));
-            $dsn = 'mysql:host=' . $this->config['host'] . ($is_port ? ';port=' . $this->config['port'] : '') . ';dbname=' . $this->config['database'];
+            $dsn = 'mysql:host=' . $this->config['host'];
+            // 端口校验：仅接受合法的正整数端口
+            $port = $this->config['port'];
+            if (is_numeric($port) && (int) $port > 0) {
+                $dsn .= ';port=' . (int) $port;
+            }
+            $dsn .= ';dbname=' . $this->config['database'];
             if (!empty($this->config['charset'])) {
                 $dsn .= ';charset=' . $this->config['charset'];
             }
@@ -207,12 +230,27 @@ class DbRecord implements RecordInterface
      * 执行更新语句
      *
      * @param string $sql
+     * @param array  $params 绑定参数
+     * @throws PDOException
      * @return integer
      */
-    protected function execute(string $sql): int
+    protected function execute(string $sql, array $params = []): int
     {
-        $query = $this->getDB()->prepare($sql);
-        $query->execute();
-        return $query->rowCount();
+        try {
+            $query = $this->getDB()->prepare($sql);
+            $query->execute($params);
+            return $query->rowCount();
+        } catch (PDOException $e) {
+            // MySQL server has gone away(2006) / 连接中断(2013)时重置连接并重试一次，适配常驻内存场景
+            $driverCode = $e->errorInfo[1] ?? 0;
+            if (in_array($driverCode, [2006, 2013])) {
+                $this->db = null;
+                $query = $this->getDB()->prepare($sql);
+                $query->execute($params);
+                return $query->rowCount();
+            }
+
+            throw $e;
+        }
     }
 }

@@ -45,8 +45,8 @@ class Util
     {
         // 日志路径
         $destination = $path . $postfix;
-        // 日志长度
-        $contentLength = mb_strlen($content);
+        // 日志长度，文件大小以字节计算，需使用字节数而非字符数
+        $contentLength = strlen($content);
         // 判断写入内容的大小
         if ($contentLength > $maxSize) {
             throw new RuntimeException("Save log content size cannot exceed {$maxSize}, content size: {$contentLength}");

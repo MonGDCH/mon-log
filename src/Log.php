@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace mon\log;
 
+use Throwable;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LoggerInterface;
 use mon\log\format\LineFormat;
@@ -34,15 +35,36 @@ class Log extends AbstractLogger implements LoggerInterface
     protected $record;
 
     /**
+     * 是否抛出异常，false 时日志失败降级处理，不中断业务
+     *
+     * @var boolean
+     */
+    protected $throw = true;
+
+    /**
      * 构造方法
      *
      * @param FormatInterface $format   日志内容解析器，默认 LineFormat
      * @param RecordInterface $record   日志内容记录器，默认 FileRecord
+     * @param boolean         $throw    日志失败是否抛出异常，默认 true
      */
-    public function __construct(?FormatInterface $format = null, ?RecordInterface $record = null)
+    public function __construct(?FormatInterface $format = null, ?RecordInterface $record = null, bool $throw = true)
     {
         $this->format = $format ?? new LineFormat();
         $this->record = $record ?? new FileRecord();
+        $this->throw = $throw;
+    }
+
+    /**
+     * 设置是否抛出异常
+     *
+     * @param boolean $throw
+     * @return Log
+     */
+    public function setThrow(bool $throw): Log
+    {
+        $this->throw = $throw;
+        return $this;
     }
 
     /**
@@ -75,10 +97,17 @@ class Log extends AbstractLogger implements LoggerInterface
      */
     public function log($level, $message, array $context = []): void
     {
-        // 解析获取日志内容
-        $content = $this->getFormat()->format($level, $message, $context);
-        // 保存
-        $this->getRecord()->record($level, $content, $context);
+        try {
+            // 解析获取日志内容
+            $content = $this->getFormat()->format($level, $message, $context);
+            // 保存
+            $this->getRecord()->record($level, $content, $context);
+        } catch (Throwable $e) {
+            // 配置为不抛出时降级处理，避免日志失败中断业务
+            if ($this->throw) {
+                throw $e;
+            }
+        }
     }
 
     /**

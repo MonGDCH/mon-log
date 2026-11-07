@@ -80,14 +80,18 @@ class FileRecord implements RecordInterface
             $log_path = $path . DIRECTORY_SEPARATOR . $log_name;
             // 日志信息
             $log = implode(PHP_EOL, $this->logs) . PHP_EOL;
-            // 保存后，清除日志记录
+            // 是否清除缓存
             $clear = $context['clear'] ?? $this->config['clear'];
-            if ($clear !== false) {
+
+            // 分卷记录日志
+            $result = Util::subsectionFile($log, $log_path, $this->config['maxSize'], $this->config['rollNum']);
+
+            // 写入成功后，清除日志记录，失败时保留缓存以便重试
+            if ($result && $clear !== false) {
                 $this->clearLog();
             }
 
-            // 分卷记录日志
-            return Util::subsectionFile($log, $log_path, $this->config['maxSize'], $this->config['rollNum']);
+            return $result;
         }
 
         return true;
